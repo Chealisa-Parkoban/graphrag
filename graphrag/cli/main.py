@@ -145,6 +145,11 @@ def _index_cli(
         "-m",
         help="The indexing method to use.",
     ),
+    cluster_method: str = typer.Option(
+        "leiden",
+        "--cluster-method",
+        help="Community detection algorithm: evoc, leiden, louvain, label_prop, girvan_newman",
+    ),
     verbose: bool = typer.Option(
         False,
         "--verbose",
@@ -200,6 +205,7 @@ def _index_cli(
         skip_validation=skip_validation,
         output_dir=output,
         method=method,
+        cluster_method=cluster_method,
     )
 
 
@@ -231,6 +237,11 @@ def _update_cli(
         "--method",
         "-m",
         help="The indexing method to use.",
+    ),
+    cluster_method: str = typer.Option(
+        "leiden",
+        "--cluster-method",
+        help="Community detection algorithm: evoc, leiden, louvain, label_prop, girvan_newman",
     ),
     verbose: bool = typer.Option(
         False,
@@ -282,6 +293,7 @@ def _update_cli(
         skip_validation=skip_validation,
         output_dir=output,
         method=method,
+        cluster_method=cluster_method,
     )
 
 

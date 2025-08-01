@@ -41,6 +41,7 @@ def _register_signal_handlers():
 def index_cli(
     root_dir: Path,
     method: IndexingMethod,
+    cluster_method: str,
     verbose: bool,
     memprofile: bool,
     cache: bool,
@@ -59,6 +60,7 @@ def index_cli(
     _run_index(
         config=config,
         method=method,
+        cluster_method=cluster_method,
         is_update_run=False,
         verbose=verbose,
         memprofile=memprofile,
@@ -71,6 +73,7 @@ def index_cli(
 def update_cli(
     root_dir: Path,
     method: IndexingMethod,
+    cluster_method: str,
     verbose: bool,
     memprofile: bool,
     cache: bool,
@@ -90,6 +93,7 @@ def update_cli(
     _run_index(
         config=config,
         method=method,
+        cluster_method=cluster_method,
         is_update_run=True,
         verbose=verbose,
         memprofile=memprofile,
@@ -102,6 +106,7 @@ def update_cli(
 def _run_index(
     config,
     method,
+    cluster_method,
     is_update_run,
     verbose,
     memprofile,
@@ -147,6 +152,8 @@ def _run_index(
         sys.exit(0)
 
     _register_signal_handlers()
+
+    config.cluster_graph.cluster_method = cluster_method
 
     outputs = asyncio.run(
         api.build_index(

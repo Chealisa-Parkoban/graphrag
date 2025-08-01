@@ -82,6 +82,7 @@ class ClusterGraphDefaults:
     max_cluster_size: int = 10
     use_lcc: bool = True
     seed: int = 0xDEADBEEF
+    cluster_method: str = "leiden"
 
 
 @dataclass

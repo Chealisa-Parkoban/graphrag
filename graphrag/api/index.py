@@ -27,6 +27,7 @@ logger = logging.getLogger(__name__)
 async def build_index(
     config: GraphRagConfig,
     method: IndexingMethod | str = IndexingMethod.Standard,
+    cluster_method: str = "leiden",
     is_update_run: bool = False,
     memory_profile: bool = False,
     callbacks: list[WorkflowCallbacks] | None = None,
@@ -64,7 +65,7 @@ async def build_index(
     logger.info("Initializing indexing pipeline...")
     # todo: this could propagate out to the cli for better clarity, but will be a breaking api change
     method = _get_method(method, is_update_run)
-    pipeline = PipelineFactory.create_pipeline(config, method)
+    pipeline = PipelineFactory.create_pipeline(config, method, cluster_method)
 
     workflow_callbacks.pipeline_start(pipeline.names())
 

@@ -82,8 +82,6 @@
 
 
 
-
-
 # =-------------------------------------------------------------------------------
 
 import logging
@@ -108,7 +106,7 @@ def cluster_graph(
     graph: nx.Graph,
     max_cluster_size: int,
     use_lcc: bool,
-    method: str = "evoc",
+    cluster_method: str,
     min_cluster_size: int = 2,
     seed: int | None = None,
 ) -> Communities:
@@ -117,6 +115,7 @@ def cluster_graph(
     method: 'leiden', 'evoc', 'louvain', 'label_prop', 'girvan_newman'
     evoc_min_size: minimum cluster size for EVōC.
     """
+
     if len(graph.nodes) == 0:
         logger.warning("Graph has no nodes")
         return []
@@ -125,13 +124,13 @@ def cluster_graph(
     if use_lcc:
         graph = stable_largest_connected_component(graph)
 
-    if method == "evoc":
+    if cluster_method == "evoc":
         node_map, parent_map = _compute_evoc_communities(graph, min_cluster_size=min_cluster_size, max_cluster_size=max_cluster_size, seed=seed)
-    elif method == "louvain":
+    elif cluster_method == "louvain":
         node_map, parent_map = _compute_louvain_communities(graph)
-    elif method == "label_prop":
+    elif cluster_method == "label_prop":
         node_map, parent_map = _compute_label_prop_communities(graph)
-    elif method == "girvan_newman":
+    elif cluster_method == "girvan_newman":
         node_map, parent_map = _compute_girvan_newman_communities(graph)
     else:
         # 默认使用 Leiden

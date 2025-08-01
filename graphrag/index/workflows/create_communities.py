@@ -36,6 +36,7 @@ async def run_workflow(
     max_cluster_size = config.cluster_graph.max_cluster_size
     use_lcc = config.cluster_graph.use_lcc
     seed = config.cluster_graph.seed
+    cluster_method = config.cluster_graph.cluster_method
 
     output = create_communities(
         entities,
@@ -43,6 +44,7 @@ async def run_workflow(
         max_cluster_size=max_cluster_size,
         use_lcc=use_lcc,
         seed=seed,
+        cluster_method= cluster_method,  # type: ignore[call-arg]  # noqa: E501
     )
 
     await write_table_to_storage(output, "communities", context.output_storage)
@@ -56,6 +58,7 @@ def create_communities(
     relationships: pd.DataFrame,
     max_cluster_size: int,
     use_lcc: bool,
+    cluster_method: str,
     seed: int | None = None,
 ) -> pd.DataFrame:
     """All the steps to transform final communities."""
@@ -65,6 +68,7 @@ def create_communities(
         graph,
         max_cluster_size,
         use_lcc,
+        cluster_method=cluster_method,
         seed=seed,
     )
 

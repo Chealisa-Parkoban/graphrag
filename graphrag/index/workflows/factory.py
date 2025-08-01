@@ -41,11 +41,26 @@ class PipelineFactory:
         cls,
         config: GraphRagConfig,
         method: IndexingMethod | str = IndexingMethod.Standard,
+        cluster_method: str = "leiden",
     ) -> Pipeline:
         """Create a pipeline generator."""
         workflows = config.workflows or cls.pipelines.get(method, [])
         logger.info("Creating pipeline with workflows: %s", workflows)
         return Pipeline([(name, cls.workflows[name]) for name in workflows])
+        
+        # workflows = config.workflows or cls.pipelines.get(method, [])
+        # logger.info("Creating pipeline with workflows: %s", workflows)
+        # pipeline_steps = []
+        # for name in workflows:
+        #     wf = cls.workflows[name]
+        #     # 如果是社区生成步骤，就给它加上 cluster_method
+        #     if name == "create_communities":
+        #         from functools import partial
+        #         wrapped = partial(wf, cluster_method=cluster_method)
+        #         pipeline_steps.append((name, wrapped))
+        #     else:
+        #         pipeline_steps.append((name, wf))
+        # return Pipeline(pipeline_steps)
 
 
 # --- Register default implementations ---
