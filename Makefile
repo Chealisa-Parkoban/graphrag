@@ -30,6 +30,14 @@ run-louvain:
 run-evoc:
 	$(MAKE) run CLUSTER_METHOD=evoc
 
+run-kmeans:
+	$(MAKE) run CLUSTER_METHOD=kmeans
+
+run-label-prop:
+	$(MAKE) run CLUSTER_METHOD=label_prop
+
+run-girvan-newman:
+	$(MAKE) run CLUSTER_METHOD=girvan_newman
 
 
 
@@ -77,3 +85,24 @@ query-global:
 # -------------------------------------------------------------------
 query-drift:
 	$(MAKE) query METHOD_Q=drift QUERY="$(QUERY)" 
+
+
+
+
+# -------------------------------------------------------------------
+MAKEFILE_PATH := $(abspath $(lastword $(MAKEFILE_LIST)))
+PROJECT_ROOT := $(dir $(MAKEFILE_PATH))
+PYTHON := python3
+COMPARE_SCRIPT := $(PROJECT_ROOT)/ragtest/src/compare.py
+
+.PHONY: compare-global compare-local
+
+# ─── 全局对比 ─────────────────────────────────────────────────────────────────
+compare-global:
+	@echo "▶ Running global comparison in $(PROJECT_ROOT)"
+	$(PYTHON) -u $(COMPARE_SCRIPT) --mode global
+
+# ─── 本地对比 ─────────────────────────────────────────────────────────────────
+compare-local:
+	@echo "▶ Running local comparison in $(PROJECT_ROOT)"
+	$(PYTHON) -u $(COMPARE_SCRIPT) --mode local

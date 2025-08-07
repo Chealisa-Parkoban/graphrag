@@ -132,6 +132,12 @@ def cluster_graph(
         node_map, parent_map = _compute_label_prop_communities(graph)
     elif cluster_method == "girvan_newman":
         node_map, parent_map = _compute_girvan_newman_communities(graph)
+    elif cluster_method == "kmeans":
+        node_map, parent_map = _compute_kmeans_communities(
+            graph,
+            max_cluster_size=max_cluster_size,
+            seed=seed,
+        )
     else:
         # 默认使用 Leiden
         node_map, parent_map = _compute_leiden_communities(
@@ -278,4 +284,53 @@ def _compute_girvan_newman_communities(graph):
     first_level = tuple(sorted(c) for c in next(comp_gen))
     mapping: dict[int, dict[int, list[Any]]] = {0: {i: list(members) for i, members in enumerate(first_level)}}
     parent: dict[int, int] = {i: -1 for i in mapping[0].keys()}
+    return mapping, parent
+
+
+def _compute_kmeans_communities(
+    graph: nx.Graph,
+    max_cluster_size: int,
+    seed: int | None = None,
+) -> tuple[dict[int, dict[int, list[Any]]], dict[int, int]]:
+    """
+    用谱嵌入 + KMeans 对图做一次性划分。
+    - graph: 要聚类的图
+    - max_cluster_size: 每个簇的最大节点数，用于决定簇数
+    - seed: 随机种子
+
+    返回 (mapping, parent)，其中
+      mapping[0][cluster_id] = [node, ...]
+      parent[cluster_id] = -1
+    """
+    from sklearn.cluster import KMeans
+
+    # 1. 先做谱嵌入
+    n = graph.number_of_nodes()
+    if n == 0:
+        return {}, {}
+
+    # 决定簇数：至少 1 个簇，最多 n // max_cluster_size + 1
+    n_clusters = max(1, n // max_cluster_size)
+    # 谱嵌入维度，最多 n-1 或者 64
+    n_comp = min(n - 1, 64)
+    adj = nx.to_numpy_array(graph, weight="weight")
+    emb = SpectralEmbedding(
+        n_components=n_comp,
+        affinity="precomputed",
+        random_state=seed,
+    )
+    X = emb.fit_transform(adj)
+
+    # 2. 运行 KMeans
+    kmeans = KMeans(n_clusters=n_clusters, random_state=seed)
+    labels = kmeans.fit_predict(X)
+
+    # 3. 构建返回格式
+    mapping: dict[int, dict[int, list[Any]]] = {0: {}}
+    parent: dict[int, int] = {}
+    for node, lbl in zip(graph.nodes(), labels):
+        mapping[0].setdefault(int(lbl), []).append(node)
+    for cid in mapping[0].keys():
+        parent[cid] = -1
+
     return mapping, parent
